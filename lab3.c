@@ -4,7 +4,7 @@
 #include "lab3.h"
 #define SIZE 9
 #define MACRO_NAME value
-
+extern int** sudoku_board;
 
 int** read_board_from_file(char* filename){
     FILE *fp = NULL;
