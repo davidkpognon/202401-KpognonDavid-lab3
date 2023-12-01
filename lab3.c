@@ -5,8 +5,8 @@
 
 extern int** sudoku_board;
 int worker_validation;
-
-//  read Sudoku board from file
+// David Kpognon code
+// Function to read Sudoku board from file
 int** read_board_from_file(char* filename) {
     // Open the file for reading
     FILE *fp = fopen(filename, "r");
@@ -15,13 +15,13 @@ int** read_board_from_file(char* filename) {
         exit(EXIT_FAILURE);
     }
 
-    // allocate memory for the 
+    // Allocate memory for the Sudoku board
     sudoku_board = (int**)malloc(sizeof(int*) * ROW_SIZE);
     for (int row = 0; row < ROW_SIZE; row++) {
         sudoku_board[row] = (int*)malloc(sizeof(int) * COL_SIZE);
-        // read values from the file 
+        // Read values from the file into the Sudoku board
         for (int col = 0; col < COL_SIZE; col++) {
-            // check if the expected number of values are read from the file
+            // Check if the expected number of values are read from the file
             if (fscanf(fp, "%d,", &sudoku_board[row][col]) != 1) {
                 perror("Error reading from file");
                 exit(EXIT_FAILURE);
@@ -33,5 +33,34 @@ int** read_board_from_file(char* filename) {
     fclose(fp);
     
     return sudoku_board;
+}
+
+
+// function to validate a row, column, or square
+void validateArray(void* param, int size, int (*getValue)(int, int, int, int)) {
+    param_struct* arg = (param_struct*)param;
+    int arr[ROW_SIZE] = {0};
+
+    // Loop through the specified array 
+    for (int i = 0; i < size; i++) {
+        int current = getValue(arg->starting_row, arg->starting_col, i / 3, i % 3);
+        // Check if the value is valid
+        if (current < 1 || current > 9 || arr[current - 1] == 1) {
+            worker_validation = 0;
+            return;
+        }
+        arr[current - 1]++;
+    }
+
+    // see if all values from 1 to 9 are present 
+    for (int i = 0; i < 9; i++) {
+        if (arr[i] != 1) {
+            worker_validation = 0;
+            return;
+        }
+    }
+
+    // if all validations pass, worker_validation to 1
+    worker_validation = 1;
 }
 
