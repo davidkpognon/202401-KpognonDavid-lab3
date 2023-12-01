@@ -6,7 +6,7 @@
 extern int** sudoku_board;
 int worker_validation;
 // David Kpognon code
-// Function to read Sudoku board from file
+// function to read Sudoku board from file
 int** read_board_from_file(char* filename) {
     // Open the file for reading
     FILE *fp = fopen(filename, "r");
@@ -15,13 +15,13 @@ int** read_board_from_file(char* filename) {
         exit(EXIT_FAILURE);
     }
 
-    // Allocate memory for the Sudoku board
+    // allocate memory for the Sudoku board
     sudoku_board = (int**)malloc(sizeof(int*) * ROW_SIZE);
     for (int row = 0; row < ROW_SIZE; row++) {
         sudoku_board[row] = (int*)malloc(sizeof(int) * COL_SIZE);
-        // Read values from the file into the Sudoku board
+        // read values from the file 
         for (int col = 0; col < COL_SIZE; col++) {
-            // Check if the expected number of values are read from the file
+            // see if the expected number of values are read from the file
             if (fscanf(fp, "%d,", &sudoku_board[row][col]) != 1) {
                 perror("Error reading from file");
                 exit(EXIT_FAILURE);
@@ -41,10 +41,10 @@ void validateArray(void* param, int size, int (*getValue)(int, int, int, int)) {
     param_struct* arg = (param_struct*)param;
     int arr[ROW_SIZE] = {0};
 
-    // Loop through the specified array 
+    // Loops through the specified array 
     for (int i = 0; i < size; i++) {
         int current = getValue(arg->starting_row, arg->starting_col, i / 3, i % 3);
-        // Check if the value is valid
+        // see if the value is valid
         if (current < 1 || current > 9 || arr[current - 1] == 1) {
             worker_validation = 0;
             return;
@@ -60,7 +60,37 @@ void validateArray(void* param, int size, int (*getValue)(int, int, int, int)) {
         }
     }
 
-    // if all validations pass, worker_validation to 1
+    // if all validations pass worker_validation to 1
     worker_validation = 1;
+}
+
+// validation function for a row
+int getRowValue(int row, int col, int i, int j) {
+    return sudoku_board[row][col + i];
+}
+
+void* validateRow(void* param) {
+    validateArray(param, ROW_SIZE, getRowValue);
+    return NULL;
+}
+
+// validation function for a column
+int getColValue(int row, int col, int i, int j) {
+    return sudoku_board[row + i][col];
+}
+
+void* validateCol(void* param) {
+    validateArray(param, COL_SIZE, getColValue);
+    return NULL;
+}
+
+// validation function for a square
+int getSquareValue(int row, int col, int i, int j) {
+    return sudoku_board[row + i][col + j];
+}
+
+void* validateSquare(void* param) {
+    validateArray(param, 9, getSquareValue);
+    return NULL;
 }
 
