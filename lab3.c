@@ -93,4 +93,37 @@ void* validateSquare(void* param) {
     validateArray(param, 9, getSquareValue);
     return NULL;
 }
+//valid
+int is_board_valid() {
+    pthread_t tid[27]; //array that stores id
+    param_struct* params = (param_struct*)malloc(sizeof(param_struct) * 27);
+    int thread_count = 0;
 
+    // validate rows and columns
+    for (int i = 0; i < 9; i++) {
+        // validate rows
+        params[thread_count].starting_row = i;
+        params[thread_count].starting_col = 0;
+        pthread_create(&tid[thread_count], NULL, validateRow, &(params[thread_count]));
+        pthread_join(tid[thread_count++], NULL);
+
+        // validate columns
+        params[thread_count].starting_row = 0;
+        params[thread_count].starting_col = i;
+        pthread_create(&tid[thread_count], NULL, validateCol, &(params[thread_count]));
+        pthread_join(tid[thread_count++], NULL);
+    }
+
+    // validate squares
+    for (int e = 2; e < 9; e += 3) {
+        for (int f = 2; f < 9; f += 3) {
+            params[thread_count].starting_row = e - 2;
+            params[thread_count].starting_col = f - 2;
+            pthread_create(&tid[thread_count], NULL, validateSquare, &(params[thread_count]));
+            pthread_join(tid[thread_count++], NULL);
+        }
+    }
+
+    free(params);
+    return worker_validation;
+}
